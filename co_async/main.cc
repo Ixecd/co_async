@@ -1,6 +1,13 @@
 #include <coroutine>
 #include <optional>
+#include <chrono>
+#include <thread>
+#include <mutex>
+#include <vector>
+#include <set>
+#include <deque>
 #include <variant>
+#include <queue>
 #include "qc.hpp"
 
 /* 所有和标准库相关的使用下划线+小写命名法, 自己的函数使用驼峰命名法, 自己的类使用大写驼峰命名法 */
@@ -156,6 +163,98 @@ struct Promise<void> {
     ~Promise() = default;
 };
 
+// ---------- 调度器 -----------
+struct Loop {
+    Loop() = default;
+    // Loop(Loop &&) = delete; 
+    Loop &operator=(Loop &&) = delete; // 一次性删除五个函数 除了默认构造函数不删
+
+    void addTask(std::coroutine_handle<> task) {
+        // mLock.lock();
+        mReadyQueue.push_back(task);
+        // mLock.unlock();
+    }
+
+    struct TimerEntry {
+        std::chrono::system_clock::time_point expireTime;
+        std::coroutine_handle<> coroutine;
+
+        TimerEntry(std::chrono::system_clock::time_point ms, std::coroutine_handle<> task) : expireTime(ms), coroutine(task) {}
+        struct MyCompareTimer {
+            bool operator() (TimerEntry const& lhs, TimerEntry const& rhs) const noexcept{
+                return lhs.expireTime < rhs.expireTime;
+            }
+        };
+
+
+    };
+
+    /**
+     * @brief 添加定时器
+     * 
+     * @param ms 激活时间
+     * @param task 激活协程,谁调用激活谁
+     */
+    void addTimer(std::chrono::system_clock::time_point ms, std::coroutine_handle<> task) {
+        mTimerHeap.push({ms, task});
+    }
+
+    void process() {
+        while (!mTimerHeap.empty() || !mReadyQueue.empty()) {
+            while (!mReadyQueue.empty()) {
+                //mLock.lock();
+                auto readyTask = mReadyQueue.front();
+                mReadyQueue.pop_front();
+                //mLock.unlock();
+                readyTask.resume();
+            }
+            if (!mTimerHeap.empty()) {
+                // auto it = std::upper_bound(timerQueue.begin(), timerQueue.end(), std::chrono::system_clock::now());
+                // mExpiredList.assign(timerQueue.begin(), it);
+                // timerQueue.erase(timerQueue.begin(), it);
+                // for (size_t i = 0; i < mExpiredList.size(); ++i) mReadyQueue.push_front(mExpiredList[i].coroutine);
+                auto nowTime = std::chrono::system_clock::now();
+                auto const& timer = mTimerHeap.top();
+                if (timer.expireTime <= nowTime) {
+                    mTimerHeap.pop();
+                    mReadyQueue.push_back(timer.coroutine);
+                } else {
+                    std::this_thread::sleep_until(timer.expireTime);
+                }
+            }
+            
+        }
+    }
+
+    // std::unique_lock<std::mutex> mLock;
+    std::deque<std::coroutine_handle<>> mReadyQueue;
+    std::deque<std::coroutine_handle<>> mWaitingQueue;
+    std::vector<TimerEntry> mExpiredList;
+    // std::set<TimerEntry, TimerEntry::MyCompareTimer> timerQueue;
+    std::priority_queue<TimerEntry, std::vector<TimerEntry>, TimerEntry::MyCompareTimer> mTimerHeap;
+};
+// 单例模式
+static Loop* getLoop() {
+    static Loop loop; // static很智能,只能构造一次,多线程安全的,是因为static
+    return &loop;
+}
+
+struct SleepAwaiter {
+    bool await_ready() const { return std::chrono::system_clock::now() >= mExpireTime; }
+
+    std::coroutine_handle<> await_suspend(std::coroutine_handle<> coroutine) const {
+        // 目前是一个同步的
+        // std::this_thread::sleep_until(mExpireTime);
+        // 如果要等的话直接return noop::coroutine()返回到主线程中
+        getLoop()->addTimer(mExpireTime, coroutine);
+        return std::noop_coroutine();
+    }
+
+    void await_resume() const noexcept {}
+
+    std::chrono::system_clock::time_point mExpireTime;
+};
+
 template <class T>
 struct Task {
     using promise_type = Promise<T>;
@@ -186,11 +285,17 @@ struct Task {
     auto operator co_await() const noexcept {
         return Awaiter(mCoroutine);
     }
+    // Task 必须可以隐式转换为coroutine_handle();
+    operator std::coroutine_handle<>() const noexcept{
+        return mCoroutine;
+    }
+
     // 协程句柄
     std::coroutine_handle<promise_type> mCoroutine;
 };
 
 }
+
 
 using namespace co_async;
 #include <string>
@@ -198,7 +303,6 @@ Task<std::string> baby() {
     DEBUG(baby);
     co_return "aaa";
 }
-
 
 Task<double> world() {
     DEBUG(world);
@@ -212,17 +316,17 @@ Task<double> world() {
 }
 
 Task<int> hello() {
-    auto ret = co_await baby();
-    PRINT(ret);
+    // auto ret = co_await baby();
+    // PRINT(ret);
 
-    // DEBUG(正在构建worldTask);
-    // Task<double> worldTask = world();
-    // DEBUG(构建完了worldTask);
-    // double ret = co_await worldTask; // 这里world执行完毕会返回到main中
-    double i = co_await world();
-    DEBUG(hello得到world结果为);
-    PRINT(i);
-    co_return i + 1;
+    // // DEBUG(正在构建worldTask);
+    // // Task<double> worldTask = world();
+    // // DEBUG(构建完了worldTask);
+    // // double ret = co_await worldTask; // 这里world执行完毕会返回到main中
+    // double i = co_await world();
+    // DEBUG(hello得到world结果为);
+    // PRINT(i);
+    // co_return i + 1;
 
     // PRINT_S(hello得到world返回值为:);
     // PRINT(ret);
@@ -242,9 +346,25 @@ Task<int> hello() {
     // co_yield 199;
     // DEBUG(hello 12);
     // co_yield 12; // co_return 表示任务已经执行完了, 使用co_yield
+    co_return 42;
 }
 
-int main() { // suspend_always 一步一停顿
+Task<int> async() {
+
+    co_return 101;
+}
+// sleep需要知道loop,到时间还要塞回队列
+Task<void> sleep_until(std::chrono::system_clock::time_point expireTime) {
+    co_await SleepAwaiter(expireTime);
+    co_return;
+}
+
+Task<void> sleep_for(std::chrono::system_clock::duration duration) {
+    co_await sleep_until(std::chrono::system_clock::now() + duration);
+    co_return;
+}
+
+void testTask() {
     DEBUG(main即将调用hello);
     Task t = hello();
     DEBUG(main调用完hello);
@@ -253,5 +373,31 @@ int main() { // suspend_always 一步一停顿
         PRINT(t.mCoroutine.promise().result());
     }
     // t.mCoroutine.resume(); // 多次RESUME直接SIGSEGV
+}
+
+int TIMEOUT = 5000;
+
+Task<int> a() {
+    DEBUG(a开始睡1s);
+    co_await sleep_for(std::chrono::seconds(1));
+    DEBUG(a睡完一秒);
+    co_return 1;
+}
+
+void testSleep() {
+    Task A = a();
+    while (!A.mCoroutine.done()) 
+        A.mCoroutine.resume();
+    return;
+}
+
+int main() { // suspend_always 一步一停顿
+
+    Task t = a();
+    DEBUG(createTask)
+    getLoop()->addTask(t);
+    DEBUG(addTaskSucc);
+    getLoop()->process();
+
     return 0;
 }
