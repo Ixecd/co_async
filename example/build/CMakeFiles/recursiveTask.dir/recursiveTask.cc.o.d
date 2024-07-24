@@ -1,6 +1,6 @@
-CMakeFiles/main.dir/main.cc.o: /home/qc/co_async/co_async/main.cc \
- /usr/include/stdc-predef.h /usr/include/c++/13/chrono \
- /usr/include/c++/13/bits/requires_hosted.h \
+CMakeFiles/recursiveTask.dir/recursiveTask.cc.o: \
+ /home/qc/co_async/example/recursiveTask.cc /usr/include/stdc-predef.h \
+ /usr/include/c++/13/chrono /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -200,10 +200,12 @@ CMakeFiles/main.dir/main.cc.o: /home/qc/co_async/co_async/main.cc \
  /usr/include/c++/13/bits/enable_special_members.h \
  /usr/include/c++/13/span /usr/include/c++/13/variant \
  /usr/include/c++/13/bits/ranges_algobase.h /usr/include/c++/13/coroutine \
- /home/qc/co_async/co_async/qc.hpp /usr/include/c++/13/iostream \
- /home/qc/co_async/co_async/task.hpp /usr/include/c++/13/utility \
- /usr/include/c++/13/bits/stl_relops.h \
- /home/qc/co_async/co_async/uninitialized.hpp /usr/include/c++/13/memory \
+ /home/qc/co_async/example/../co_async/co_async/qc.hpp \
+ /usr/include/c++/13/iostream \
+ /home/qc/co_async/example/../co_async/co_async/task.hpp \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
+ /home/qc/co_async/example/../co_async/co_async/uninitialized.hpp \
+ /usr/include/c++/13/memory \
  /usr/include/c++/13/bits/stl_raw_storage_iter.h \
  /usr/include/c++/13/bits/shared_ptr_atomic.h \
  /usr/include/c++/13/bits/atomic_base.h \
@@ -242,6 +244,6 @@ CMakeFiles/main.dir/main.cc.o: /home/qc/co_async/co_async/main.cc \
  /usr/include/c++/13/bits/hashtable_policy.h \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/erase_if.h \
- /home/qc/co_async/co_async/non_void_helper.hpp \
- /home/qc/co_async/co_async/previous_awaiter.hpp \
- /home/qc/co_async/co_async/concepts.hpp
+ /home/qc/co_async/example/../co_async/co_async/non_void_helper.hpp \
+ /home/qc/co_async/example/../co_async/co_async/previous_awaiter.hpp \
+ /home/qc/co_async/example/../co_async/co_async/concepts.hpp
