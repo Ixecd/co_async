@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/qc/co_async/example/recursiveTask.cc" "CMakeFiles/recursiveTask.dir/recursiveTask.cc.o" "gcc" "CMakeFiles/recursiveTask.dir/recursiveTask.cc.o.d"
+  "/home/qc/co_async/example/when_all.cc" "CMakeFiles/when_all.dir/when_all.cc.o" "gcc" "CMakeFiles/when_all.dir/when_all.cc.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

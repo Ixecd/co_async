@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/qc/co_async/example/../co_async
 
-CXX_FLAGS = -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Werror=return-type -g
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++23 -Wall -Wextra -Werror=return-type -g
 

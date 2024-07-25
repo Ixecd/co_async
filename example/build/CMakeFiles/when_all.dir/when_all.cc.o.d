@@ -1,5 +1,5 @@
-CMakeFiles/recursiveTask.dir/recursiveTask.cc.o: \
- /home/qc/co_async/example/recursiveTask.cc /usr/include/stdc-predef.h \
+CMakeFiles/when_all.dir/when_all.cc.o: \
+ /home/qc/co_async/example/when_all.cc /usr/include/stdc-predef.h \
  /usr/include/c++/13/chrono /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -244,6 +244,23 @@ CMakeFiles/recursiveTask.dir/recursiveTask.cc.o: \
  /usr/include/c++/13/bits/hashtable_policy.h \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/erase_if.h \
+ /usr/include/c++/13/bits/move_only_function.h \
+ /usr/include/c++/13/bits/mofunc_impl.h \
  /home/qc/co_async/example/../co_async/co_async/non_void_helper.hpp \
  /home/qc/co_async/example/../co_async/co_async/previous_awaiter.hpp \
- /home/qc/co_async/example/../co_async/co_async/concepts.hpp
+ /home/qc/co_async/example/../co_async/co_async/when_all.hpp \
+ /home/qc/co_async/example/../co_async/co_async/concepts.hpp \
+ /home/qc/co_async/example/../co_async/co_async/return_previous.hpp \
+ /home/qc/co_async/example/../co_async/co_async/sleep_awaiter.hpp \
+ /usr/include/c++/13/thread /usr/include/c++/13/stop_token \
+ /usr/include/c++/13/atomic /usr/include/c++/13/bits/std_thread.h \
+ /usr/include/c++/13/semaphore /usr/include/c++/13/bits/semaphore_base.h \
+ /usr/include/c++/13/bits/atomic_timed_wait.h \
+ /usr/include/c++/13/bits/this_thread_sleep.h \
+ /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/semaphore.h \
+ /usr/include/x86_64-linux-gnu/bits/semaphore.h \
+ /home/qc/co_async/example/../co_async/co_async/scheduler.hpp \
+ /usr/include/c++/13/queue /usr/include/c++/13/deque \
+ /usr/include/c++/13/bits/stl_deque.h /usr/include/c++/13/bits/deque.tcc \
+ /usr/include/c++/13/bits/stl_queue.h \
+ /home/qc/co_async/example/../co_async/co_async/rbtree.hpp

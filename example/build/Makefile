@@ -117,41 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named recursiveTask
+# Target rules for targets named when_all
 
 # Build rule for target.
-recursiveTask: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 recursiveTask
-.PHONY : recursiveTask
+when_all: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 when_all
+.PHONY : when_all
 
 # fast build rule for target.
-recursiveTask/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/recursiveTask.dir/build.make CMakeFiles/recursiveTask.dir/build
-.PHONY : recursiveTask/fast
+when_all/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/when_all.dir/build.make CMakeFiles/when_all.dir/build
+.PHONY : when_all/fast
 
-recursiveTask.o: recursiveTask.cc.o
-.PHONY : recursiveTask.o
+when_all.o: when_all.cc.o
+.PHONY : when_all.o
 
 # target to build an object file
-recursiveTask.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/recursiveTask.dir/build.make CMakeFiles/recursiveTask.dir/recursiveTask.cc.o
-.PHONY : recursiveTask.cc.o
+when_all.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/when_all.dir/build.make CMakeFiles/when_all.dir/when_all.cc.o
+.PHONY : when_all.cc.o
 
-recursiveTask.i: recursiveTask.cc.i
-.PHONY : recursiveTask.i
+when_all.i: when_all.cc.i
+.PHONY : when_all.i
 
 # target to preprocess a source file
-recursiveTask.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/recursiveTask.dir/build.make CMakeFiles/recursiveTask.dir/recursiveTask.cc.i
-.PHONY : recursiveTask.cc.i
+when_all.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/when_all.dir/build.make CMakeFiles/when_all.dir/when_all.cc.i
+.PHONY : when_all.cc.i
 
-recursiveTask.s: recursiveTask.cc.s
-.PHONY : recursiveTask.s
+when_all.s: when_all.cc.s
+.PHONY : when_all.s
 
 # target to generate assembly for a file
-recursiveTask.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/recursiveTask.dir/build.make CMakeFiles/recursiveTask.dir/recursiveTask.cc.s
-.PHONY : recursiveTask.cc.s
+when_all.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/when_all.dir/build.make CMakeFiles/when_all.dir/when_all.cc.s
+.PHONY : when_all.cc.s
 
 # Help Target
 help:
@@ -161,10 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... recursiveTask"
-	@echo "... recursiveTask.o"
-	@echo "... recursiveTask.i"
-	@echo "... recursiveTask.s"
+	@echo "... when_all"
+	@echo "... when_all.o"
+	@echo "... when_all.i"
+	@echo "... when_all.s"
 .PHONY : help
 
 
