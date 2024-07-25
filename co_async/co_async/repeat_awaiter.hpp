@@ -7,6 +7,8 @@
  * @copyright Copyright (c) 2024
  * 
  */
+#pragma once
+
 #include <coroutine>
 #include "concepts.hpp"
 
@@ -22,6 +24,8 @@ struct RepeatAwaiter {
     }
 
     void await_resume() const noexcept {}
+
+    std::coroutine_handle<> mCoroutine;
 };
 
 struct RepeatAwaitable {

@@ -10,6 +10,8 @@
  * @copyright Copyright (c) 2024
  * 
  */
+#pragma once
+
 #include <coroutine>
 #include <type_traits>
 #include <concepts>
