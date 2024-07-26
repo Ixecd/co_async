@@ -8,9 +8,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
 
-include_directories(${CMAKE_SOURCE_DIR}/../co_async/)
+include_directories(${CMAKE_SOURCE_DIR}/../)
 
-# file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}../co_async/*.cc")
+# file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/*.cc")
 
 add_compile_options(-Wall -Wextra -Werror=return-type -g)
 
@@ -20,3 +20,4 @@ add_compile_options(-Wall -Wextra -Werror=return-type -g)
 #add_executable(sleep sleep.cc)
 #add_executable(scheduler scheduler.cc)
 add_executable(when_all when_all.cc)
+#add_executable(co_await_leftone co_await_leftone.cc)
