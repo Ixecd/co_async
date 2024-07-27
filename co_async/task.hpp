@@ -12,8 +12,10 @@
 #include <exception> // for std::exception_ptr
 #include <coroutine>
 #include <utility>
-#include "qc.hpp"
-#include "uninitialized.hpp"
+#include <utilities/qc.hpp>
+#include <utilities/uninitialized.hpp>
+#include <utilities/non_void_helper.hpp>
+#include "concepts.hpp"
 #include "previous_awaiter.hpp"
 
 /// @brief C++20协程中有很多硬编码函数xxx_xxx() -> 涉及到concept
@@ -132,6 +134,9 @@ template <class T = void, class P = Promise<T>>
 struct Task {
     // 对于一个Task类,必须有promise_type -> Promise<T> 类型
     using promise_type = P;
+
+    using returnType = AwaitableTraits<T>::Type;
+
     // coroutine_handle<T>中的T表示的是协程句柄承诺返回的类型
     // 一个为 T 类型的Task 其promise_type也得是T表返回类型
     Task(std::coroutine_handle<promise_type> coroutine) noexcept : mCoroutine(coroutine) { }
@@ -146,7 +151,9 @@ struct Task {
     }
 
     ~Task() {
-        if (mCoroutine) mCoroutine.destroy();
+        if (mCoroutine) {
+            mCoroutine.destroy();
+        }
     }
 
     // Task里面有一个Awaiter, 是为了co_await 另一个协程
