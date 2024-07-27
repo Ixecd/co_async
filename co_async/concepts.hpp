@@ -16,8 +16,8 @@
 #include <type_traits>
 #include <concepts>
 #include <utility> // for declval
-#include "uninitialized.hpp"
-#include "non_void_helper.hpp"
+#include <utilities/uninitialized.hpp>
+#include <utilities/non_void_helper.hpp>
 
 namespace co_async {
 
@@ -44,6 +44,7 @@ struct AwaitableTraits {
     using Type = A;
 };
 
+// Awaiter类型萃取
 template <Awaiter A>
 struct AwaitableTraits<A> {
     //将任意类型 A 转换成引用类型，在 decltype 表达式中不必经过构造函数就能使用成员函数(如果默认构造函数删除了的话就必须用这个)。
