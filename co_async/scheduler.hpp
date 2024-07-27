@@ -1,12 +1,14 @@
 #pragma once
 
+#include <set>
 #include <coroutine>
 #include <queue>
 #include <vector>
 #include <thread>
-#include "qc.hpp"
+#include <utilities/qc.hpp>
+#include <utilities/rbtree.hpp>
 #include "task.hpp"
-#include "rbtree.hpp"
+#include "timerLoop.hpp"
 
 
 namespace co_async {
@@ -14,24 +16,31 @@ namespace co_async {
 // 在异步中使用Loop(黑话)->scheduler
 struct Loop {
 
-    struct TimerEntry {
-        std::chrono::system_clock::time_point mExpireTime;
-        std::coroutine_handle<> mCoroutine;
+    // struct TimerEntry {
+    //     std::chrono::system_clock::time_point mExpireTime;
+    //     std::coroutine_handle<> mCoroutine;
 
-        TimerEntry(std::chrono::system_clock::time_point expireTime, std::coroutine_handle<> coroutine) : mExpireTime(expireTime), mCoroutine(coroutine) {}
+    //     TimerEntry(std::chrono::system_clock::time_point expireTime, std::coroutine_handle<> coroutine) : mExpireTime(expireTime), mCoroutine(coroutine) {}
 
-        // 类中的Comparation必须是const属性
-        bool operator< (TimerEntry const& that) const noexcept {
-            // priority_queue默认大顶堆,优先级高的放前面
-            // 如果 mExpireTimer < that.mExpireTime; 优先级是从小到大,所以mExpir大的在前面
-            // 所以这里要 > 
-            return mExpireTime > that.mExpireTime;
-        }
-    };
+    //     // 类中的Comparation必须是const属性
+    //     bool operator< (TimerEntry const& that) const noexcept {
+    //         // priority_queue默认大顶堆,优先级高的放前面
+    //         // 如果 mExpireTimer < that.mExpireTime; 优先级是从小到大,所以mExpir大的在前面
+    //         // 所以这里要 > 
+    //         return mExpireTime > that.mExpireTime;
+    //     }
+    // };
 
-    void addTimer(std::chrono::system_clock::time_point expireTime, std::coroutine_handle<> task) {
-        mTimerQueue.push({expireTime, task});
-    }
+    // RbTree<TimerEntry> mRbTimer{};
+
+    // void addTimer(std::chrono::system_clock::time_point expireTime, std::coroutine_handle<> task) {
+    //     mTimerQueue.push({expireTime, task});
+    // }
+
+    // void addTimer(TimerEntry &te) {
+    //     mRbTimer.insert(te);
+    // }
+
 
     // 在Task中必须可以类型转换为协程句柄
     void addTask(std::coroutine_handle<> task) {
@@ -39,7 +48,7 @@ struct Loop {
     }
 
     void process() {
-        while (!mReadyQueue.empty() || !mTimerQueue.empty()) {
+        while (!mReadyQueue.empty()) {
             while (!mReadyQueue.empty()) {
                 // DEBUG(mReadyQueueisNotEmpty);
                 // PRINT(mReadyQueue.size());
@@ -47,21 +56,31 @@ struct Loop {
                 mReadyQueue.pop_front();
                 t.resume();
             }
-            while (!mTimerQueue.empty()) {
-                TimerEntry timer = mTimerQueue.top();
-                auto nowTime = std::chrono::system_clock::now();
-                // 重载了 < 就用 <
-                if (timer.mExpireTime < nowTime) {
-                    mTimerQueue.pop();
-                    timer.mCoroutine.resume();
-                } else break;
-            }
-            if (mReadyQueue.empty() && !mTimerQueue.empty()) std::this_thread::sleep_until(mTimerQueue.top().mExpireTime);
         }
     }
 
+    // void run(std::coroutine_handle<> coroutine) {
+    //     while (!coroutine.done()) {
+    //         coroutine.resume();
+    //         while (!mRbTimer.empty()) {
+    //             if (!mRbTimer.empty()) {
+    //                 auto nowTime = std::chrono::system_clock::now();
+    //                 auto &te = mRbTimer.front();
+    //                 if (te.mExpireTime < nowTime) {
+    //                     mRbTimer.erase(te);
+    //                     te.mCoroutine.resume();
+    //                 } else std::this_thread::sleep_until(te.mExpireTime);
+    //             }
+    //         }
+    //     }
+    // }
+
     std::deque<std::coroutine_handle<>> mReadyQueue;
-    std::priority_queue<TimerEntry> mTimerQueue;
+    // when_any的时候定时器要从这里面删除掉
+    // 优先队列只要头的话很高效,不能删除,所以改用set的weak版本->RbTree
+    // std::priority_queue<TimerEntry> mTimerQueue;
+    // std::set<int> mSet;
+
     // 单例要删除,下面这个直接构造函数,赋值函数都删了,只保留了默认构造
     Loop& operator=(Loop &&) = delete;
 
