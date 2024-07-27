@@ -5,8 +5,8 @@
 #include <co_async/task.hpp>
 #include <co_async/when_all.hpp>
 #include <co_async/concepts.hpp>
+#include <co_async/timerLoop.hpp>
 #include <co_async/uninitialized.hpp>
-#include <co_async/sleep_awaiter.hpp>
 #include <co_async/non_void_helper.hpp>
 #include <co_async/return_previous.hpp>
 #include <co_async/previous_awaiter.hpp>
