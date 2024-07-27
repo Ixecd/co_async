@@ -1,11 +1,11 @@
 #include <chrono>
 #include <coroutine>
-#include <co_async/qc.hpp>
+#include <utilities/qc.hpp>
 #include <co_async/task.hpp>
 #include <co_async/concepts.hpp>
 #include <co_async/timerLoop.hpp>
-#include <co_async/uninitialized.hpp>
-#include <co_async/non_void_helper.hpp>
+#include <utilities/uninitialized.hpp>
+#include <utilities/non_void_helper.hpp>
 #include <co_async/previous_awaiter.hpp>
 
 using namespace co_async;
