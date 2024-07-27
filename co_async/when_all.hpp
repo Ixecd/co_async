@@ -14,10 +14,10 @@
 #include <coroutine>
 #include <tuple>
 #include <span>
-#include "qc.hpp"
+#include <utilities/qc.hpp>
+#include <utilities/uninitialized.hpp>
 #include "task.hpp"
 #include "concepts.hpp"
-#include "uninitialized.hpp"
 #include "return_previous.hpp"
 
 namespace co_async {
@@ -40,11 +40,15 @@ struct WhenAllAwaiter {
         // 记录调用者
         mControl.mPrevious = coroutine;
         // 直接执行留下一个
+        // 可以留也可以不留,可以用ReturnPreviousTask也可以不用
+        // 如果不用的话必须在当前的Awaiter中执行完所有协程,之后return coroutine
+        // 这样也不需要在control中记录任务数量
         for (auto const &t: mTasks.subspan(0, mTasks.size()))
             t.mCoroutine.resume();
         // 返回的是ReturnPreviousTask中的协程
         // return mTasks.back().mCoroutine;
-        return std::noop_coroutine();
+        return //mControl.mPrevious;
+        std::noop_coroutine();
     }
 
     void await_resume() const {
