@@ -14,7 +14,8 @@ struct ReturnPreviousPromise {
     }
 
     auto final_suspend() noexcept {
-        return PreviousAwaiter(mPrevious);
+        return //std::suspend_always();
+        PreviousAwaiter(mPrevious);
     }
 
     void unhandled_exception() {
@@ -28,15 +29,21 @@ struct ReturnPreviousPromise {
     // 下面是详细解释
     // 作为一个ReturnPreviousTask类就是为了返回previous所以必须记录previous
     // co_return control.mPrevious;
+
     // Q :记得为什么要执行span的时候为什么要留一个吗?
     // A1:就是为了return 到Task中的时候 让Task执行这个mCoroutine,执行的时候一定会使
     // contorl中的count减为0,好让co_return control.mPrevious, 设置returnPromise
     // 的previous为 control.mPrevious 之后ReturnPreviousPromise中调用final_suspend->回到Task
-    // 
+
     // A2:ReturnPreviousTask中的co_return control.mPrevious 是为了在对应的Promise中
     // 设置自己的previous为 Task 仅此而已,之后这最后一个任务执行完会调用自己的Promise中
     // 的final_suspend() -> PreviousAwaiter(mPrevious) -> 才真正返回到Task中.
     // 如果在ReturnPreviousPromise中不记录的话,那么就回不到Task
+
+    // A2:其实也可以不用留,将所有事情都交给Awaiter即可,Awaiter中传入的是调用者的协程句柄
+    // Awaiter中的await_suspend()->处理完所有的子协程->顺序一个一个resume->之后返回coroutine参数就行
+    // 这样在ReturnPreviousTask中也不需要判断count是否减为0,直接返回std::noop_coroutine即可
+    // ReturnPreviousTask只负责将得到的任务协程的结果putValue进result就行.
 
     // Q :又测试了一下发现不留也能回去为啥??
     // A : 因为在Task中调用co_await已经将当前协程句柄记录在CtlBlock中了,就算在子协程直接返回std::noop_coroutine()
