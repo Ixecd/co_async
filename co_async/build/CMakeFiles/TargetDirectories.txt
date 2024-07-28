@@ -1,3 +1,0 @@
-/home/qc/co_async/co_async/build/CMakeFiles/main.dir
-/home/qc/co_async/co_async/build/CMakeFiles/edit_cache.dir
-/home/qc/co_async/co_async/build/CMakeFiles/rebuild_cache.dir
