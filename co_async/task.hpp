@@ -128,7 +128,6 @@ struct Promise<void> {
     Promise& operator=(Promise &&) = delete;
 };
 
-// 任务类型对应的Promise类型可以不一致
 // 针对于返回类型为void的任务只需要单独设置一份Promise即可,不需要特化Task
 template <class T = void, class P = Promise<T>>
 struct Task {
