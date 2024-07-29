@@ -19,7 +19,7 @@
 1. `bool await_read() const noexcept { return true/fase; }`当通过协程句柄(从Promise中的get_return_object获取)唤醒一个协程后,会进入Awaiter中这个函数执行,判断当前协程对象准备好了没有,如果准备好了就直接执行,如果没有准备好,就会执行下面这个函数.
 2. `RetValue await_suspend(T para) { ... }`函数名的意思是挂起,但是否真正挂起要看这个函数是怎么写的.如果返回的是一个协程句柄,那么就会执行这个返回的协程句柄.
 3. `RetValue await_resume() const { return ... }`表示当前协程对象执行完毕,父对象协程会调用这个函数来获取子协程对象执行的结果.之后才是调用Promise中的final_suspend.
-- 可以这么理解,一个Awaiter就表示一个子协程对象.因为只有在协程函数中才会出现 co_await 这个关键字,其表示等待后面的Awaiter(子协程句柄)执行完毕.
+- 可以这么理解,由Awaiter来控制着子协程对象挂起的时候要干什么(最重要).co_await 后面可以跟 协程对象/Awaiter, 如果是Awaiter(依然会把父的协程句柄传递给await_suspend)那么并不会生成一个协程对象,而是由其做一些其他事情, 如果是 协程对象,就会走 Task中的 Awaiter 走重载.
 
 **Task**
 - Task表示协程任务,其核心就是保存一个协程句柄`std::coroutine_handle<promise_type> mCoroutine;`以及重载 co_await 使其返回一个Awaiter对象, 这里协程句柄的类型必须和Promse类型一致,因为T在Task中没用,在Promise中才有用,为了模板化使得Task可以返回任意类型的value,所以Task中的T和Promise中的T要对应.
