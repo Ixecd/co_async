@@ -17,16 +17,16 @@
 using namespace co_async;
 using namespace std::chrono_literals;
 
-Task<int> hello1() {
+Task<void> hello1() {
     DEBUG(hello1BeginSleep);
-    co_await sleep_for(getTimerLoop(), 1s); // 1s 等价于 std::chrono::seconds(1)
+    co_await sleep_for(getTimerLoop(), 2s); // 1s 等价于 std::chrono::seconds(1)
     DEBUG(hello1EndSleep);
-    co_return 1;
+    co_return ;
 }
 
 Task<int> hello2() {
     DEBUG(hello2BeginSleep);
-    co_await sleep_for(getTimerLoop(), 2s); // 2s 等价于 std::chrono::seconds(2)
+    co_await sleep_for(getTimerLoop(), 1s); // 2s 等价于 std::chrono::seconds(2)
     DEBUG(hello2EndSleep);
     co_return 2;
 }
