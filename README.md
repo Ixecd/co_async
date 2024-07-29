@@ -23,3 +23,20 @@
 
 **Task**
 - Task表示协程任务,其核心就是保存一个协程句柄`std::coroutine_handle<promise_type> mCoroutine;`以及重载 co_await 使其返回一个Awaiter对象, 这里协程句柄的类型必须和Promse类型一致,因为T在Task中没用,在Promise中才有用,为了模板化使得Task可以返回任意类型的value,所以Task中的T和Promise中的T要对应.
+
+**三者之间的联系**
+- 编写带有返回类型为Task的函数体,函数体中有co_yield/co_return/co_await关键字.
+- 使用 `auto t = fiber();` 生成一个协程对象,仅仅生成,并不执行.由于Task的类型是<T, Promise<T>>也就是说Task和Promise是始终绑定的,通过`std::coroutine_handle<promise_type>`;
+- 要生成一个协程对象,首先要通过Promise中的`get_return_object`获取协程句柄,之后通过隐式类型转换,转换到Task的构造函数上,之后生成Task实例,这时候Task中的成员变量,绑定的就是std::coroutine_handle<promise_type>类型.
+- 之后可以通过手动或者Loop将对应coroutine.promise().resume(),由编译器(coroutine头文件),就会跳转到对应的协程函数上执行,也就是说resume()后相当于Task在run.
+- 如果在协程函数上出现`co_await fiber2()`,首先和前面一样生成一个协程对象fiber2(),之后调用Task中重载过的co_await, 里面返回的是Awaiter(mCor).如果co_awiat 后面不是协程对象,而是一个Awaiter那么就走后面的Awaiter,而非Task中的Awaiter
+- 最后登场的是Awaiter, 这时候编译器开始干活了,`return Awaiter(std::coroutine_handle<promis_type> c)`这里面的c是当前协程对象的协程句柄,其作为参数传递给Awaiter,本质上是传递给Awaiter具体实现中的`await_suspend(...)`,当然是先判断Awaiter中的`await_ready()`,如果是true,直接调用`await_resume()`, false,调用`await_suspend(...)`
+- 这里的Awaiter给到的是子协程对象的,由于Task中的Awaiter中有成员变量`std::coroutine_handle<promise_type> mCor`,这里的promise_type非常重要,记录了子协程对象的promise类型,可以通过mCor获得Promise对象.之后就可以操作Promise对象.Awaiter中记录了调用者是谁,后面`返回子协程的协程句柄`,之后由编译器(coroutine头文件)`自动resume`子协程.
+
+**特别注意**
+1. 对于Hook协程函数而言,其函数体中的co_await是被重载了但是没有用到,co_await 后面必须跟 Awaitalbe/Awaiter, 如果后面跟的是一个协程对象就会用到Task中重载的.
+- 下面是详细解释
+
+    现在我们要Hook系统中的sleep_until/sleep_for实现异步, 因为我们要手动控制Promise的生命周期,也就是协程对象的生命周期,详见`timerLoop.hpp`,在sleep_until/sleep_for的时候co_await后面接的是自己实现的SleepAwaiter, 这时候就不会调用Task中的Awaiter,而是直接走SleepAwaiter.这也就解释了为什么SleepAwaiter中的await_suspend函数中参数是`std::coroutine_handle<SleepPromise>`类型, 因为是我们当前Hook的sleep_for/until函数调用的co_await,这俩函数的返回类型为Task<void, Sleeppromise>,这里 `sleep_for/until` 是 `父`,而 `SleepAwaiter` 是 `子`, co_await是父传子,会将自己的协程句柄传递给SleepAwaiter中的await_suspend函数的参数, 而 SleepAwaiter不是协程,不需要记录协程句柄信息.
+    如果co_await 后面跟的是一个协程对象那么就会走Task中的Awaiter,这个Awaiter会记录自己的协程句柄.
+
