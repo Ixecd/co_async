@@ -13,6 +13,7 @@ using namespace std::chrono_literals;
 IoLoop loop;
 
 Task<std::string> reader() {
+    // 这里就相当于添加了一次事件,这行代码执行完,promise就寄了,直接从epoll中删除事件
     co_await wait_file(loop, 0, EPOLLIN);
     std::string s;
     while (1) {
@@ -22,6 +23,7 @@ Task<std::string> reader() {
             if (errno != EAGAIN) [[unlikely]] {
                 throw std::system_error(errno, std::system_category());
             }
+            // 读完了
             break;
         }
         s.push_back(c);
