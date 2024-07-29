@@ -1,3 +1,14 @@
+/**
+ * @file when_any.hpp
+ * @author qc
+ * @brief 这里的when_all 是配合sleep使用,达到超时的效果,如果不使用sleep就要自己实现Promise搭配RbTree
+ *        RbTree中的Node被删除,Promise就被删除
+ * @version 0.1
+ * @date 2024-07-28
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #pragma once
 
 #include <coroutine>
@@ -29,6 +40,7 @@ struct WhenAnyAwaiter {
     await_suspend(std::coroutine_handle<> coroutine) const {
         if (mTasks.empty()) return coroutine;
         mControl.mPrevious = coroutine;
+        // 这里是线性执行的哦,只有遇到sleep才会加入队列
         for (auto const &t : mTasks.subspan(0, mTasks.size() - 1)) 
             t.mCoroutine.resume();
         return mTasks.back().mCoroutine;
@@ -84,6 +96,7 @@ whenAnyImpl(std::index_sequence<Is...>, Ts &&... ts) {
     ReturnPreviousTask taskArray[] {
         whenAnyHelper(ts, control, std::get<Is>(result), Is)...
     };
+    // 只要有一个执行完就会回到这里,在于ReturnPreviousTask中直接co_return previous;
     co_await WhenAnyAwaiter(control, taskArray);
 
     Uninitialized<std::variant<typename AwaitableTraits<Ts>::NonVoidRetType...>> varResult;
