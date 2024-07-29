@@ -41,6 +41,8 @@ struct IoFilePromise : Promise<void> {
         return std::coroutine_handle<IoFilePromise>::from_promise(*this);
     }
 
+    ~IoFilePromise();
+
     IoFilePromise& operator=(IoFilePromise&&) = delete;
 
     // Promise和IoLoop相互依赖,所以这里用指针,并且析构函数要放下实现,还要记得+inline
@@ -71,10 +73,11 @@ struct IoLoop {
             for (int i = 0; i < rt; ++i) {
                 auto &event = ebuf[i];
                 auto &promise = *(IoFilePromise *)ebuf[i].data.ptr;
-                checkError(epoll_ctl(mEpfd, EPOLL_CTL_DEL, promise.mFd, nullptr));
+                //checkError(epoll_ctl(mEpfd, EPOLL_CTL_DEL, promise.mFd, nullptr));
+                // 下面promise 对应的协程句柄执行完就会析构掉promise,也就会析构掉事件
                 std::coroutine_handle<IoFilePromise>::from_promise(promise).resume();
             }
-        } else if (rt == 0) PRINT_S(1sStillNotEvent);
+        }
         
     }
 
@@ -91,10 +94,10 @@ struct IoLoop {
     struct epoll_event mEventBuf[64];
 };
 
-// inline
-// IoFilePromise::~IoFilePromise() {
-//     mLoop->removeListener(mFd);
-// }
+inline
+IoFilePromise::~IoFilePromise() {
+    mLoop->removeListener(mFd);
+}
 
 // 大头在这里
 struct IoAwaiter {
@@ -103,6 +106,7 @@ struct IoAwaiter {
 
     void await_suspend(std::coroutine_handle<IoFilePromise> coroutine) const {
         auto &promise = coroutine.promise();
+        promise.mLoop = &mLoop;
         promise.mFd = mFd;
         promise.mEvents = mEvents;
         mLoop.addListener(promise);
@@ -116,11 +120,10 @@ struct IoAwaiter {
     int mFd;
     uint32_t mEvents;
 };
-// 这个是自定义协程函数,也就是说只有协程才会调用这个函数
+// 这里就不会resume了,因为是io操作,一个wait_file就是向epoll中监听一个文件描述符
 Task<void, IoFilePromise>
 wait_file(IoLoop &loop, int fd, uint32_t events) {
-    // 本来就是一个普通函数
-    co_await IoAwaiter(loop, fd, events);
+    co_await IoAwaiter(loop, fd, events | EPOLLONESHOT);
 }
 
 
