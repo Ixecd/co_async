@@ -59,12 +59,21 @@ void testHello() {
 }
 
 Task<void> testVar() {
+    // 这里本来 t1 的类型为 Task<int> 
+    // 因为要使用when_all 有co_await 会把Task转换为Awaiter
+    // ReturnPreviousTask const& WhenAllAwaiter
     auto t1 = fiber1();
     auto t2 = fiber2();
     auto t3 = fiber3();
     // tuple结构化绑定
     // when_all本质上是一个模板类型为tuple的Task
-    // 
+    // when_all 接收的类型是Awaitbale
+    // 注意这里调用when_all 跟着 co_await 所以 t1,t2,t3都会转换为Awaiter
+    // 这个Awaiter(Task内部的)不会改变,但是会由另一种ReturnPreviousTask和
+    // WhenAllAwaiter接管.之后由ReturnPreviousTask执行这仨.执行完最后一个
+    // ReturnPreviousTask会回到whenAllImpl中之后return
+    
+    // 当然调用when_all也不需要使用 co_await, 所以 when_all的返回类型必须是Task
     auto [x, y, z] = co_await when_all(t1, t2, t3);
     PRINT(x);
     PRINT(y);
