@@ -21,6 +21,7 @@
 #include "task.hpp"
 #include "scheduler.hpp"
 
+using namespace std::chrono_literals;
 namespace co_async {
 
 // 定时器不需要返回任何value 直接继承Promise<void>即可
@@ -59,6 +60,12 @@ struct TimerLoop {
 
     void addTimer(SleepUntilPromise &promise) {
         mRbTimer.insert(promise);
+    }
+
+    std::chrono::system_clock::duration getNext() const noexcept {
+        // 在这里设置epoll_wait的TIMEOUT, min(3, 下一个定时器)
+        if (!hasTimer()) return 3s;
+        else return mRbTimer.front().mExpireTime - std::chrono::system_clock::now();
     }
 
     std::optional<std::chrono::system_clock::duration> run() {
