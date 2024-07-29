@@ -62,13 +62,13 @@ struct WhenAllAwaiter {
     std::span<ReturnPreviousTask const> mTasks;
 };
 
-template <class T>
+template <class T> // Task 只有在 co_await之后才会被转换为Awaiter, 这里传入的是Awaiter,怎么转化为Task?
 ReturnPreviousTask whenAllHelper(auto &&t, WhenAllCtlBlock &control, Uninitialized<T> &result) {
     try {
-        // t -> awaiter -> Task forward是完美转发
-        // t 作为一个 只要符合概念的任务,其对应的Awaiter中await_resume必须有返回值
+        // t 作为一个 只要符合概念的任务, 是更加底层的Task
         // 如果没有就去下面那一个void版本
-        result.putValue(co_await std::forward<decltype(t)>(t));
+        // co_await后面 如果co_await 返回为void, 则result.putValue 为 NonVoidHelper<void>{}
+        result.putValue((co_await std::forward<decltype(t)>(t), NonVoidHelper<>()));
     } catch (...) {
         control.mException = std::current_exception();
         co_return control.mPrevious;
@@ -80,10 +80,21 @@ ReturnPreviousTask whenAllHelper(auto &&t, WhenAllCtlBlock &control, Uninitializ
     co_return std::noop_coroutine();
 }
 
+// 注意上面如果用了 result.putValue((co_await std::forward<decltype(t)>(t), NonVoidHelper<>())); 
+// 那么下面的就完全可以省略.
 template<class = void>
+// template <> 如果这里要特化
+// co_await 后面跟的是Awaiter或者是Task, 如果是Task返回一个Awaiter,在awaiter的参数中记录协程句柄信息,
+// 所以这里类型是Awaiter, 所以不能使用Task作为参数.只能用Awaiter,由于Task可以转化为Awaiter,而Awaiter
+// 目前无法转化为Task,所以这里特化之后无法推断出来 t 的类型
+// template <>
+// ReturnPreviousTask whenAllHelper<void> (Task<void, Promise<void>> &&t, WhenAllCtlBlock &control, Uninitialized<void> &) {
 ReturnPreviousTask whenAllHelper (auto &&t, WhenAllCtlBlock &control, Uninitialized<void> &) {
     try {
+        // 完美转发,相当于co_await std::move(t); t 是一个Awaiter
+        // 这里的t的类型是外部的Task类型,这个Task内部有一个Awaiter, 这里co_await的是Task内部的Awaiter
         co_await std::forward<decltype(t)>(t);
+        // co_await t;
     } catch (...) {
         control.mException = std::current_exception();
         co_return control.mPrevious;
@@ -93,6 +104,8 @@ ReturnPreviousTask whenAllHelper (auto &&t, WhenAllCtlBlock &control, Uninitiali
         co_return control.mPrevious; // 执行完就返回到Task中
     co_return std::noop_coroutine();
 }
+
+
 // 下面生成的整数序列可以直接直接使用std::index_sequence<Ts...>展开
 // whenAllEmpl的Promise类型是Promise<std::tuple<>...>
 template<std::size_t... Is, class... Ts>
@@ -117,9 +130,9 @@ whenAllImpl(std::index_sequence<Is...>, Ts &&...ts) {
     co_await WhenAllAwaiter(control, taskArray);
     // 将tuple move到Promise<std::tuple<>>中的mResult中
     // Q : 为什么这里又是NonVoidRetType?
-    // A : 由于result中的Type被Uninitialized修饰,所以result中如果有一个是void
-    // 那么这个void调用moveValue()就会返回一个NonVoidHelper对象,而不是void,所以下面的tuple
-    //必须能够接收这种类型
+    // A : 由于result中的Type被Uninitialized修饰,所以result中如果有一个是Uninitialized<void>
+    // 那么这个void调用moveValue()就会返回一个NonVoidHelper对象,而不是void(),也不能是void
+    // 所以下面的tuple必须能够接收这种类型
     co_return std::tuple<typename AwaitableTraits<Ts>::NonVoidRetType...>(std::get<Is>(result).moveValue()...);
 }
 
