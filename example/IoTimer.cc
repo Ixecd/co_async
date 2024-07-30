@@ -29,14 +29,16 @@ IoLoop epollLoop;
 TimerLoop timerLoop;
 
 Task<std::string> reader() {
-    auto which = co_await when_any(wait_file(epollLoop, 0, EPOLLIN), sleep_for(timerLoop, 1s));
+    AsyncFile stdIn(0);
+    // 注意这里 when_any中的wait_file只是将监听的fd的事件加入到epoll中,对应的协程句柄并没有resume,所以promise没有析构
+    auto which = co_await when_any(wait_file_event(epollLoop, stdIn, EPOLLIN), sleep_for(timerLoop, 1s));
     if (which.index() == 1) co_return "超过1s无任何输入";
     // 执行完32行,Promise还在,因为要等事件触发,只有之间触发之后,才会调用Promise的resume(),resume完就析构了
     std::string s;
     // 下面是对缓冲区的优化, 基于MSVC
-    size_t chunk = 15;
+    ssize_t chunk = 15;
     while (1) {
-        size_t exist = s.size();
+        ssize_t exist = s.size();
         s.resize(exist + chunk);
         ssize_t len = read(0, s.data() + exist, chunk);
         if (len == -1) {
@@ -71,11 +73,9 @@ int main() {
     t.mCoroutine.resume();
     while (!t.mCoroutine.done()) {
         if (auto delay = timerLoop.run()) {
-            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(*delay).count();
-            PRINT(ms);
-            epollLoop.tryRun(ms);
+            epollLoop.tryRun(delay);
         } else {
-            epollLoop.tryRun(-1);
+            epollLoop.tryRun();
         }
     }
 
