@@ -62,9 +62,9 @@ struct TimerLoop {
         mRbTimer.insert(promise);
     }
 
-    std::chrono::system_clock::duration getNext() const noexcept {
+    std::optional<std::chrono::system_clock::duration> getNext() const noexcept {
         // 在这里设置epoll_wait的TIMEOUT, min(3, 下一个定时器)
-        if (!hasTimer()) return 3s;
+        if (!hasTimer()) return std::nullopt;
         else return mRbTimer.front().mExpireTime - std::chrono::system_clock::now();
     }
 
