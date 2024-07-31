@@ -77,7 +77,8 @@ struct IoFilePromise : Promise<IoEventMask> {
 };
 
 // 对文件描述符进行封装
-struct [[nodiscard]] AsyncFile {
+// [[nodiscard]] 如果没有co_await会警告
+struct [[nodiscard("no co_await")]] AsyncFile {
     AsyncFile() : mFd(-1) {}
 
     explicit AsyncFile(int fd) noexcept: mFd(fd) {}
@@ -255,8 +256,9 @@ std::size_t writeFileSync(AsyncFile &file, std::span<char const> buffer) {
 }
 
 Task<std::size_t> read_file(IoLoop &loop, AsyncFile &file, std::span<char> buffer) {
-    co_await wait_file_event(loop, file, EPOLLIN | EPOLLRDHUP); //
+    co_await wait_file_event(loop, file, EPOLLIN | EPOLLRDHUP); //LT
     // readFileSync是普通函数,非异步
+    // 这里是LT模式,因为buffer不是无限大,如果有数据就会触发,再到下面来读取数据
     auto len = readFileSync(file, buffer);
     co_return len;
 }
@@ -269,7 +271,8 @@ Task<std::size_t> write_file(IoLoop &loop, AsyncFile &file, std::span<char const
 
 inline
 Task<std::string> read_string(IoLoop &loop, AsyncFile &file) {
-    uint32_t triggeredEvent = co_await wait_file_event(loop, file, EPOLLIN);
+    // 如果是一次性读完缓冲区中所有数据那么,就是用ET模式更高效
+    uint32_t triggeredEvent = co_await wait_file_event(loop, file, EPOLLIN | EPOLLET);
     if (triggeredEvent == EPOLLIN) PRINT_S(triggeredEpollIn);
     std::string s; // 基于MSVC对string进行优化
     ssize_t chunk = 15;
@@ -287,7 +290,7 @@ Task<std::string> read_string(IoLoop &loop, AsyncFile &file) {
             s.resize(exist + len);
             break;
         }
-        if (chunk < 65536) {
+        if (chunk < 65536) {//64K
             chunk *= 3;
         }
     }
