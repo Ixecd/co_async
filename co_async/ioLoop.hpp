@@ -16,6 +16,7 @@
  */
 #include <unistd.h>
 #include <sys/fcntl.h>
+#include <sys/ioctl.h>
 #include <sys/epoll.h>
 #include <source_location>
 #include <co_async/task.hpp>
