@@ -14,6 +14,7 @@
  * @copyright Copyright (c) 2024
  * 
  */
+#pragma once
 #include <unistd.h>
 #include <sys/fcntl.h>
 #include <sys/ioctl.h>
@@ -188,6 +189,7 @@ struct IoFileAwaiter {
     int op = EPOLL_CTL_ADD;
 };
 
+
 inline
 IoFilePromise::~IoFilePromise() {
     mAwaiter->mLoop.removeListener(mAwaiter->mFd);
@@ -211,10 +213,12 @@ inline bool
 IoLoop::tryRun(std::optional<std::chrono::system_clock::duration> timeout) {
     if (mCount == 0) {
         PRINT_S(没事件);
-        return false;
+        PRINT_S(应该退出但是继续监听);
+        // return false;
     }
-    int timeoutInMs = -1;
+    int timeoutInMs = 1000;
     if (timeout) timeoutInMs = std::chrono::duration_cast<std::chrono::milliseconds>(*timeout).count();
+    PRINT(timeoutInMs);
     int rt = checkError(epoll_wait(mEpfd, mEventBuf, 10, timeoutInMs));
     if (rt > 0) {
         // PRINT_S(getEvent!);
@@ -246,6 +250,12 @@ wait_file_event(IoLoop &loop, AsyncFile &file, IoEventMask events) {
     uint32_t resumeEvents = co_await IoFileAwaiter(loop, file, events | EPOLLONESHOT);
     co_return resumeEvents;
 }
+
+// 一次添加一种
+// Task<IoEventMask, IoFilePromise>
+// add_event(IoLoop &loop, AsyncFile &file, IoEventMask event) {
+
+// }
 
 std::size_t readFileSync(AsyncFile &file, std::span<char> buffer) {
     // span == ary + size()
