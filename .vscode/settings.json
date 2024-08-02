@@ -69,7 +69,9 @@
         "netfwd": "cpp",
         "source_location": "cpp",
         "timer": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "codecvt": "cpp",
+        "cstring": "cpp"
     },
     "cmake.sourceDirectory": "/home/qc/co_async/example"
 }
