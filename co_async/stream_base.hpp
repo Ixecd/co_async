@@ -85,7 +85,6 @@ struct IStreamBase {
         co_return s;
     }
 
-private:
     bool bufferEmpty() const noexcept {
         return mIndex == mEnd;
     }
@@ -125,7 +124,6 @@ struct OStreamBase {
             co_await putChar(c);
     }
 
-private:
     bool bufferFull() const noexcept {
         return mIndex = mBufSize;
     }
