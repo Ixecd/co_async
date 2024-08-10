@@ -48,8 +48,7 @@ using IoEventMask = std::uint32_t;
 //     tc.c_lflag &= ~ECHO;
 //     tcsetattr(STDIN_FILENO, TCSANOW, &tc);
 // }
-
-
+inline
 auto checkError(auto res, std::source_location const& loc = std::source_location::current()) {
     if (res == -1) [[unlikely]]
         // system_error cpp13 从错误码构造,底部调用strerror获取真正报错信息
@@ -82,8 +81,8 @@ struct IoFilePromise : Promise<IoEventMask> {
 // [[nodiscard]] 如果没有co_await会警告
 struct [[nodiscard("no co_await")]] AsyncFile {
     AsyncFile() : mFd(-1) {}
-
-    explicit AsyncFile(int fd) noexcept: mFd(fd) {}
+    // 不用设计为explicit
+    AsyncFile(int fd) noexcept: mFd(fd) {}
 
     AsyncFile(AsyncFile const& that) noexcept: mFd(that.mFd) {}
 
@@ -127,6 +126,8 @@ private:
 };
 
 // 一个loop对应一个epoll
+// event_loop.hpp中直接覆写IoLoop
+// 也就是说下面的IoLoop并不会被用到
 struct IoLoop {
     bool addListener(IoFilePromise &promise, int op);
 
@@ -245,6 +246,7 @@ IoLoop::tryRun(std::optional<std::chrono::system_clock::duration> timeout) {
 
 
 // wait_file 调用成功之后返回 触发了哪些事件,所以类型为 uint32_t
+inline
 Task<IoEventMask, IoFilePromise>
 wait_file_event(IoLoop &loop, AsyncFile &file, IoEventMask events) {
     uint32_t resumeEvents = co_await IoFileAwaiter(loop, file, events | EPOLLONESHOT);
@@ -256,16 +258,18 @@ wait_file_event(IoLoop &loop, AsyncFile &file, IoEventMask events) {
 // add_event(IoLoop &loop, AsyncFile &file, IoEventMask event) {
 
 // }
-
+inline
 std::size_t readFileSync(AsyncFile &file, std::span<char> buffer) {
     // span == ary + size()
     return checkError(read(file.fileNo(), buffer.data(), buffer.size()));
 }
 
+inline
 std::size_t writeFileSync(AsyncFile &file, std::span<char const> buffer) {
     return checkError(write(file.fileNo(), buffer.data(), buffer.size()));
 }
 
+inline
 Task<std::size_t> read_file(IoLoop &loop, AsyncFile &file, std::span<char> buffer) {
     co_await wait_file_event(loop, file, EPOLLIN | EPOLLRDHUP); //LT
     // readFileSync是普通函数,非异步
@@ -274,6 +278,7 @@ Task<std::size_t> read_file(IoLoop &loop, AsyncFile &file, std::span<char> buffe
     co_return len;
 }
 
+inline
 Task<std::size_t> write_file(IoLoop &loop, AsyncFile &file, std::span<char const> buffer) {
     co_await wait_file_event(loop, file, EPOLLOUT | EPOLLHUP);
     auto len = writeFileSync(file, buffer);
