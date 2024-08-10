@@ -49,12 +49,14 @@ struct Promise {
     // co_yield 设置返回值
     auto yield_value(T && ret) {
         mResult.putValue(std::move(ret));
-        return std::suspend_always(); //继续 Awaitable对象
+        // return std::suspend_always(); //继续 Awaitable对象
+        return PreviousAwaiter(mPrevious); // 返回父协程
     }
 
     auto yield_value(T const& ret) {
         mResult.putValue(ret);
-        return std::suspend_always(); //继续
+        // return std::suspend_always(); //继续
+        return PreviousAwaiter(mPrevious);
     }
 
     // co_return 的结果
@@ -77,7 +79,7 @@ struct Promise {
     // union {
     //     T mResult;
     // };
-    Uninitialized<T> mResult; // 底层是union
+    Uninitialized<T> mResult;
 
     // 作为一个Promise,不应该移动和拷贝
     // 除了构造函数其它五个也删除了,小技巧
@@ -104,6 +106,10 @@ struct Promise<void> {
     // 在一个Promise中return_void和return_value只能二存一
     void return_void() noexcept {}
     // void return_value() { }
+
+    auto yield_value(void) {
+        return PreviousAwaiter(mPrevious);
+    }
 
     // void 是数据成员的类型,既然是void就不可能再yield的时候存数据
 

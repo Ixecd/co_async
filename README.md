@@ -40,3 +40,41 @@
     现在我们要Hook系统中的sleep_until/sleep_for实现异步, 因为我们要手动控制Promise的生命周期,也就是协程对象的生命周期,详见`timerLoop.hpp`,在sleep_until/sleep_for的时候co_await后面接的是自己实现的SleepAwaiter, 这时候就不会调用Task中的Awaiter,而是直接走SleepAwaiter.这也就解释了为什么SleepAwaiter中的await_suspend函数中参数是`std::coroutine_handle<SleepPromise>`类型, 因为是我们当前Hook的sleep_for/until函数调用的co_await,这俩函数的返回类型为Task<void, Sleeppromise>,这里 `sleep_for/until` 是 `父`,而 `SleepAwaiter` 是 `子`, co_await是父传子,会将自己的协程句柄传递给SleepAwaiter中的await_suspend函数的参数, 而 SleepAwaiter不是协程,不需要记录协程句柄信息.
     如果co_await 后面跟的是一个协程对象那么就会走Task中的Awaiter,这个Awaiter会记录自己的协程句柄.
 
+**深入理解协程句柄**
+- `coroutine_handle<promise_type>`这个类型表示`无所有权`的协程帧句柄,用于恢复协程执行或摧毁协程帧,其可以访问promsie对象
+
+**深入理解co_await关键字**
+- co_await运算符是一个单目运算符
+- co_await的强大之处就是`await_suspend(handle)`,在协程被挂起之后,恢复之前,执行一些代码
+- 一个支持co_await运算符的类型被称为Awaitable类型(我们编写的Task中重载了co_await,表示Task是一个Awaitable类型)
+- 当编译器看见`co_await <expr>`的时候,编译器如何采取下一步取决于涉及到的类型
+    1. 暂停(挂起)当前协程
+    2. 获取Awaiter
+        - 如果是自己写的Task(Awaitable),其会被转换为Awaiter,转换的时候是调用的子Task里的co_await
+        - 如果直接跟的是一个Awaiter,那就用后面跟的
+    3. 执行Awaiter
+        - 先判断`await_read()`,如果为true直接返回当前协程,省略暂停开销
+        - 否则走`await_suspend(handle)`,当前协程已被挂起,执行里面的代码
+        - 执行完毕后,由当前协程调用`await_resume()`来获取,子协程执行返回的结果
+
+**深入理解Awaiter**
+- Awaiter等待者(Concept)
+- 其中`await_ready()`表示当前协程准备好没有,准备好的话就不用存储协程当前状态信息,直接返回执行,避免暂停的开销 如果没准备好,走`await_suspend()`
+- 其中如果`await_suspend(handle)`的返回值是void,将无条件转移执行权给协程的调用者, 如果返回类型为bool,true转移给调用者,`false`表明协程应该立即恢复并继续执行
+- `await_suspend()`负责调度协程
+- 当然`await_suspend(handle)`的返回类型也可以是`std::coroutine_handle<promise_type>`,这样的话就可以实现对称协程,返回的是谁就执行谁,但是不好控制,所以设置PreviousAwaiter,将对称设计为嵌入
+- `await_resume()`的返回值就是`co_await`的结果,其也可以抛出一个异常
+- 当协程恢复执行时,也就是子协程执行完返回到父协程的时候,首先调用`await_resume()`获得结果,之后会立即销毁Awaiter对象
+- 在`await_suspend(handle)`内部,如果只实例化了一个Awaiter,一旦当前子协程句柄被传递给其他线程,就会并发恢复,Awaiter有可能会被多次销毁
+- `await_suspend(handle)` handle 是表示当前(父)协程的协程句柄 这个函数内部可通过这个句柄观察暂停的协程，而且此函数负责调度它以在某个执行器上恢复,或将其销毁(并返回 false 当做调度)
+
+*关于`await_suspend(handle)`的返回值*
+1. 若 await_suspend 返回 `void`,则将控制立即返回给当前协程的调用方/恢复方(此协程保持暂停)
+2. 若 await_suspend 返回 `bool`
+    - 值为 true 时将控制返回给当前协程的调用方/恢复方
+    - 值为 false 时恢复当前协程。
+3. 若 await_suspend 返回`某个其他协程的协程句柄`，则（通过调用 handle.resume()）恢复该句柄（注意这可以连锁进行，并`最终导致当前协程恢复`）
+4. 若 await_suspend `抛异常`，则`捕捉该异常`，`恢复协程`，并`立即重抛异常`
+
+
+
