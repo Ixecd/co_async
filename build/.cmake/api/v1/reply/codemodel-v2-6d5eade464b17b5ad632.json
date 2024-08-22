@@ -1,0 +1,186 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "Project",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "IoTimer::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-IoTimer-Debug-dae59d8a42e45d0f361d.json",
+					"name" : "IoTimer",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "co_await_leftone::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-co_await_leftone-Debug-0f75e23b55ab9d232fb2.json",
+					"name" : "co_await_leftone",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "epoll::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-epoll-Debug-b27eced19ca5857ff12f.json",
+					"name" : "epoll",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "exception::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-exception-Debug-2ae87ac711eea7d7be3e.json",
+					"name" : "exception",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "generator::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-generator-Debug-e7716b0c2e6f7ff1ae3f.json",
+					"name" : "generator",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ioawaiter::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ioawaiter-Debug-be15867c47ea531f354e.json",
+					"name" : "ioawaiter",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "recursiveTask::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-recursiveTask-Debug-2dbcf2d7b6691ffff794.json",
+					"name" : "recursiveTask",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "scheduler::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-scheduler-Debug-054cca988e3387840a4f.json",
+					"name" : "scheduler",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sleep::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sleep-Debug-0d34f9151caa8f65229e.json",
+					"name" : "sleep",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "socket::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-socket-Debug-7350c315d00ebce6a070.json",
+					"name" : "socket",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "task::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-task-Debug-24db42e0a38d5fdf2fe9.json",
+					"name" : "task",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "test_lock::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-test_lock-Debug-0ec8db456b1da4f20895.json",
+					"name" : "test_lock",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "timer::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-timer-Debug-86ab18eff091cefbfbfc.json",
+					"name" : "timer",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "when_all::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-when_all-Debug-a4670f9a26c3a4915a21.json",
+					"name" : "when_all",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "when_any::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-when_any-Debug-fdba7974a62cb376c368.json",
+					"name" : "when_any",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/qc/co_async/build",
+		"source" : "/home/qc/co_async/example"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}

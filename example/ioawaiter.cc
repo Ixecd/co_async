@@ -11,10 +11,10 @@ using namespace co_async;
 using namespace std::chrono_literals;
 
 IoLoop loop;
-
+AsyncFile fd = 0;
 Task<std::string> reader() {
     // 这里就相当于添加了一次事件,这行代码执行完,promise就寄了,直接从epoll中删除事件
-    co_await wait_file(loop, 0, EPOLLIN);
+    co_await wait_file_event(loop, fd, EPOLLIN);
     std::string s;
     while (1) {
         char c;
@@ -45,7 +45,7 @@ Task<void> async_main() {
 int main() {
 
     int attr = 1;
-    ioctl(0, FIONBIO, &attr);
+    ioctl(fd.fileNo(), FIONBIO, &attr);
 
     int var = 100;
 

@@ -71,7 +71,10 @@
         "timer": "cpp",
         "future": "cpp",
         "codecvt": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "shared_mutex": "cpp",
+        "syncstream": "cpp"
     },
+    "editor.wordSegmenterLocales": "zh-CN",
     "cmake.sourceDirectory": "/home/qc/co_async/example"
 }

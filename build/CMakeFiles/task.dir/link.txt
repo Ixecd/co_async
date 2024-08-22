@@ -1,0 +1,1 @@
+/usr/bin/g++ -g CMakeFiles/task.dir/task.cc.o -o /home/qc/co_async/example/bin/task 

@@ -129,14 +129,14 @@ sleep_for(TimerLoop &loop, std::chrono::duration<Rep, Period> duration) {
         co_await SleepAwaiter(loop, std::chrono::system_clock::now() + d);
 }
 
-// Task<void, SleepUntilPromise> sleep_until(std::chrono::system_clock::time_point expireTime) {
-//     auto &loop = getTimerLoop();
-//     co_await SleepAwaiter(loop, expireTime);
-// }
+Task<void, SleepUntilPromise> sleep_until(std::chrono::system_clock::time_point expireTime) {
+    auto &loop = getTimerLoop();
+    co_await SleepAwaiter(loop, expireTime);
+}
 
-// Task<void, SleepUntilPromise> sleep_for(std::chrono::system_clock::duration duration) {
-//     auto &loop = getTimerLoop();
-//     co_await SleepAwaiter(loop, std::chrono::system_clock::now() + duration);
-// }
+Task<void, SleepUntilPromise> sleep_for(std::chrono::system_clock::duration duration) {
+    auto &loop = getTimerLoop();
+    co_await SleepAwaiter(loop, std::chrono::system_clock::now() + duration);
+}
 
 }

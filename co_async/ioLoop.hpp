@@ -82,8 +82,8 @@ struct IoFilePromise : Promise<IoEventMask> {
 // [[nodiscard]] 如果没有co_await会警告
 struct [[nodiscard("no co_await")]] AsyncFile {
     AsyncFile() : mFd(-1) {}
-
-    explicit AsyncFile(int fd) noexcept: mFd(fd) {}
+    // 允许隐式转换
+    AsyncFile(int fd) noexcept: mFd(fd) {}
 
     AsyncFile(AsyncFile const& that) noexcept: mFd(that.mFd) {}
 

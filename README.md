@@ -5,7 +5,7 @@
 
 **Promise**
 
-- 协程的近亲是函数(而非线程),如果编译器在函数中看见类似于co_yield、co_return就会认为当前函数体是一个协程函数.其可以生成一个协程对象,比如: 定义一个协程函数`Task<T> fiber() {... co_return}`,其中T是存储的数据类型,实例化一个协程对象`auto t = fiber();`这时候本质上是生成一个Promise<T>对象,由其掌控着当前实例化的协程对象的生命周期,Promise这个结构体中除了如果协程要返回值的函数,其他都是具有硬编码的编译器函数.
+- 如果编译器在函数中看见类似于co_yield、co_return就会认为当前函数体是一个协程函数.其可以生成一个协程对象,比如: 定义一个协程函数`Task<T> fiber() {... co_return}`,其中T是存储的数据类型,实例化一个协程对象`auto t = fiber();`这时候本质上是生成一个Promise<T>对象,由其掌控着当前实例化的协程对象的生命周期,Promise这个结构体中除了如果协程要返回值的函数,其他都是具有硬编码的编译器函数.
 - 这里只简单介绍Promise中的一些硬编码关键字
 1. `auto get_return_object() { return std::coroutine_handle<Promise>::from_this(*this); }`表示生成当前协程实例的协程句柄,之后由这个协程句柄来唤醒`resume`
 2. `T final_suspend() noexcept { ... }`表示当前协程对象执行完毕,最后一次挂起的时候执行的函数体,
