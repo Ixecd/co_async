@@ -94,6 +94,7 @@ struct TimerLoop {
     TimerLoop& operator=(TimerLoop &&) = delete;
 };
 
+inline
 TimerLoop& getTimerLoop() {
     static TimerLoop loop;
     return loop;
