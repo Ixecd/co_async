@@ -79,13 +79,12 @@ struct IoFilePromise : Promise<IoEventMask> {
 
 // 对文件描述符进行封装
 // [[nodiscard]] 如果没有co_await会警告
-struct [[nodiscard("no co_await")]] AsyncFile {
+// [[nodiscard("no co_await")]] version control confict
+struct  AsyncFile {
     AsyncFile() : mFd(-1) {}
-<<<<<<< HEAD
     // 允许隐式转换
-=======
+
     // 不用设计为explicit
->>>>>>> refs/remotes/origin/master
     AsyncFile(int fd) noexcept: mFd(fd) {}
 
     AsyncFile(AsyncFile const& that) noexcept: mFd(that.mFd) {}
