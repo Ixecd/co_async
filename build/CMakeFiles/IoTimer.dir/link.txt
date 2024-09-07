@@ -1,1 +1,0 @@
-/usr/bin/g++ -g CMakeFiles/IoTimer.dir/IoTimer.cc.o -o /home/qc/co_async/example/bin/IoTimer 

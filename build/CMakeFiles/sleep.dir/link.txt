@@ -1,1 +1,0 @@
-/usr/bin/g++ -g CMakeFiles/sleep.dir/sleep.cc.o -o /home/qc/co_async/example/bin/sleep 

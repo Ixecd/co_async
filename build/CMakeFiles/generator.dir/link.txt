@@ -1,1 +1,0 @@
-/usr/bin/g++ -g CMakeFiles/generator.dir/generator.cc.o -o /home/qc/co_async/example/bin/generator 

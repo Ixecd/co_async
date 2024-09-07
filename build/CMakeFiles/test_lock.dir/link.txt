@@ -1,1 +1,0 @@
-/usr/bin/g++ -g CMakeFiles/test_lock.dir/test_lock.cc.o -o /home/qc/co_async/example/bin/test_lock 

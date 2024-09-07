@@ -1,1 +1,0 @@
-/usr/bin/g++ -g CMakeFiles/co_await_leftone.dir/co_await_leftone.cc.o -o /home/qc/co_async/example/bin/co_await_leftone 
